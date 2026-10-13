@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Budgets{% endblock %}
+{% block contenu %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h1 class="h4 mb-0">Enveloppes budgétaires {{ exercice }}</h1>
+  <div class="d-flex gap-2"><form method="get" class="d-flex gap-2"><input class="form-control" style="width:110px" type="number" name="exercice" value="{{ exercice }}"><button class="btn btn-outline-secondary">Afficher</button></form>
+  {% if peut_modifier %}<a class="btn btn-ang" href="{% url 'enveloppe_creer' %}"><i class="bi bi-plus-circle"></i> Nouvelle enveloppe</a>{% endif %}</div></div>
+<div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead><tr><th>Direction / Commission</th><th class="text-end">Alloué</th><th class="text-end">Engagé</th><th class="text-end">Disponible</th><th style="width:220px">Taux d'engagement</th><th></th></tr></thead>
+  <tbody>{% for l in lignes %}<tr><td>{{ l.e.structure }}</td><td class="text-end">{{ l.e.montant_alloue|gnf }}</td><td class="text-end">{{ l.engage|gnf }}</td>
+    <td class="text-end {% if l.e.disponible < 0 %}text-danger fw-bold{% endif %}">{{ l.e.disponible|gnf }}</td>
+    <td><div class="barre {% if l.taux > 100 %}depasse{% elif l.taux >= 85 %}alerte{% endif %}"><span style="width:{% if l.taux > 100 %}100{% else %}{{ l.taux }}{% endif %}%"></span></div><small>{{ l.taux }} %</small></td>
+    <td>{% if peut_modifier %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'enveloppe_modifier' l.e.pk %}"><i class="bi bi-pencil"></i></a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Aucune enveloppe pour cet exercice.</td></tr>{% endfor %}</tbody>
+  <tfoot><tr class="fw-bold"><td>Total alloué</td><td class="text-end">{{ total|gnf }}</td><td colspan="4"></td></tr></tfoot></table></div></div>
+{% endblock %}

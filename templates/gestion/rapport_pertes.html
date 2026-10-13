@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Pertes et écarts{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Pertes, casses et écarts d'inventaire</h1>
+{% include "partials/filtre_rapport.html" %}
+<div class="row g-3 mb-3"><div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Valeur totale perdue</div><div class="stat-nombre text-danger">{{ total|gnf }}</div></div></div></div>
+  <div class="col-md-8"><div class="card h-100"><div class="card-header bg-white fw-semibold">Principales causes</div><ul class="list-group list-group-flush">
+    {% for c in par_cause %}<li class="list-group-item d-flex justify-content-between"><span>{{ c.motif|truncatechars:70 }}</span><span>{{ c.n }} fois · {{ c.v|gnf }}</span></li>{% empty %}<li class="list-group-item text-muted">Aucune perte enregistrée.</li>{% endfor %}</ul></div></div></div>
+<div class="card"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr><th>Date</th><th>Article</th><th>Type</th><th class="text-end">Quantité</th><th class="text-end">Valeur</th><th>Motif</th><th>Par</th></tr></thead>
+  <tbody>{% for m in mouvements %}<tr><td class="text-nowrap">{{ m.date|date:"d/m/Y" }}</td><td>{{ m.article.designation }}</td><td>{{ m.get_type_mvt_display }}</td><td class="text-end">{{ m.quantite }}</td><td class="text-end">{{ m.valeur|gnf }}</td><td>{{ m.motif }}</td><td>{{ m.utilisateur|default:"" }}</td></tr>
+  {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Aucune perte sur la période.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

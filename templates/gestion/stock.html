@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Stock{% endblock %}
+{% block contenu %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h4 mb-0">Catalogue et stocks</h1>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'mouvements' %}"><i class="bi bi-arrow-left-right"></i> Mouvements</a>
+    {% if user.peut_gerer_stock %}<a class="btn btn-outline-danger" href="{% url 'perte' %}">Déclarer une perte</a>
+      <a class="btn btn-outline-secondary" href="{% url 'ajustement' %}">Inventaire / ajustement</a>{% endif %}
+    {% if user.peut_gerer_catalogue %}<a class="btn btn-ang" href="{% url 'article_creer' %}"><i class="bi bi-plus-circle"></i> Nouvel article</a>{% endif %}
+  </div>
+</div>
+<form method="get" class="card card-body mb-3"><div class="row g-2 align-items-center">
+  <div class="col-lg-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Désignation ou référence…"></div>
+  <div class="col-lg-3"><select class="form-select" name="type"><option value="">Tous les types</option>{% for c, l in types %}<option value="{{ c }}" {% if c == type_sel %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-lg-2"><div class="form-check"><input class="form-check-input" type="checkbox" name="alertes" value="1" id="al" {% if alertes %}checked{% endif %}><label class="form-check-label" for="al">Alertes seulement</label></div></div>
+  <div class="col-lg-2"><button class="btn btn-ang w-100">Filtrer</button></div>
+</div></form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Réf.</th><th>Désignation</th><th>Catégorie</th><th class="text-end">Stock</th><th class="text-end">Seuil</th><th>État</th><th class="text-end">P.U.</th><th class="text-end">Valeur</th><th></th></tr></thead>
+  <tbody>{% for a in articles %}
+    <tr><td class="text-nowrap">{{ a.reference }}</td>
+      <td>{{ a.designation }}{% if a.est_equipement %} <span class="badge bg-secondary">équip.</span>{% endif %}{% if not a.actif %} <span class="badge bg-dark">inactif</span>{% endif %}</td>
+      <td>{{ a.categorie }}</td><td class="text-end fw-semibold">{{ a.stock }} <small class="text-muted">{{ a.unite }}</small></td><td class="text-end">{{ a.seuil_alerte }}</td>
+      <td><span class="badge bg-{{ a.niveau.1 }}">{{ a.niveau.0 }}</span></td>
+      <td class="text-end">{{ a.prix_reference|nombre }}</td><td class="text-end">{{ a.valeur_stock|gnf }}</td>
+      <td class="text-nowrap text-end">
+        <a class="btn btn-sm btn-outline-secondary" title="Mouvements" href="{% url 'mouvements' %}?article={{ a.pk }}"><i class="bi bi-clock-history"></i></a>
+        {% if user.peut_gerer_catalogue %}<a class="btn btn-sm btn-outline-secondary" title="Modifier" href="{% url 'article_modifier' a.pk %}"><i class="bi bi-pencil"></i></a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="9" class="text-center text-muted py-4">Aucun article.</td></tr>{% endfor %}</tbody>
+  <tfoot><tr class="fw-bold"><td colspan="7" class="text-end">Valeur totale du stock affiché</td><td class="text-end">{{ valeur_totale|gnf }}</td><td></td></tr></tfoot>
+</table></div></div>
+{% endblock %}

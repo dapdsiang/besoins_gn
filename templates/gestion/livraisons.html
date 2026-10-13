@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titre %}Livraisons{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Historique des livraisons</h1>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Référence</th><th>Commande</th><th>Fournisseur</th><th>Date</th><th>BL</th><th>Reçu par</th></tr></thead>
+  <tbody>{% for l in page %}<tr><td>{{ l.reference }}</td><td><a href="{% url 'commande_detail' l.commande.pk %}">{{ l.commande.reference }}</a></td><td>{{ l.commande.fournisseur }}</td><td>{{ l.date_livraison|date:"d/m/Y" }}</td><td>{{ l.numero_bl|default:"—" }}</td><td>{{ l.recu_par }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Aucune livraison.</td></tr>{% endfor %}</tbody></table></div>
+  <div class="card-footer bg-white">{% include "partials/pagination.html" %}</div></div>
+{% endblock %}

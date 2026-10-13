@@ -1,0 +1,25 @@
+{{ formset.management_form }}
+{% if formset.non_form_errors %}<div class="alert alert-danger py-2">{{ formset.non_form_errors }}</div>{% endif %}
+<div class="table-responsive">
+<table class="table table-sm table-lignes align-middle" id="tableau-lignes">
+  <thead><tr>{% for field in formset.empty_form.visible_fields %}<th>{{ field.label }}</th>{% endfor %}</tr></thead>
+  <tbody id="corps-lignes">
+  {% for form in formset %}
+    <tr class="ligne">{% for h in form.hidden_fields %}{{ h }}{% endfor %}
+      {% for field in form.visible_fields %}<td>{{ field }}{% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>{% endfor %}</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<button type="button" class="btn btn-sm btn-outline-secondary" id="ajouter-ligne"><i class="bi bi-plus-circle"></i> Ajouter une ligne</button>
+<template id="modele-ligne"><tr class="ligne">{% for h in formset.empty_form.hidden_fields %}{{ h }}{% endfor %}
+  {% for field in formset.empty_form.visible_fields %}<td>{{ field }}</td>{% endfor %}</tr></template>
+<script>
+document.getElementById("ajouter-ligne").addEventListener("click", function () {
+  const total = document.getElementById("id_{{ formset.prefix }}-TOTAL_FORMS");
+  const n = parseInt(total.value, 10);
+  const html = document.getElementById("modele-ligne").innerHTML.replace(/__prefix__/g, n);
+  document.getElementById("corps-lignes").insertAdjacentHTML("beforeend", html);
+  total.value = n + 1;
+});
+</script>

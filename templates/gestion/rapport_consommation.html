@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Rapport de consommation{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Rapport de consommation {% if exercice %}<small class="text-muted">exercice {{ exercice }}</small>{% endif %}</h1>
+{% include "partials/filtre_rapport.html" with export=True %}
+<div class="card mb-3"><div class="card-body"><div class="text-muted small">Valeur totale consommée (sorties de stock)</div><div class="stat-nombre">{{ total|gnf }}</div></div></div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header bg-white fw-semibold">Par direction / commission</div><div class="card-body">
+    {% for l in par_structure %}<div class="mb-2"><div class="d-flex justify-content-between small"><span>{{ l.nom }}</span><span>{{ l.valeur|gnf }} · {{ l.qte }} u.</span></div><div class="barre"><span style="width:{{ l.pct }}%"></span></div></div>
+    {% empty %}<p class="text-muted mb-0">Aucune consommation sur la période.</p>{% endfor %}</div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header bg-white fw-semibold">Principaux articles (top 15)</div><div class="card-body">
+    {% for l in par_article %}<div class="mb-2"><div class="d-flex justify-content-between small"><span>{{ l.nom }}</span><span>{{ l.valeur|gnf }} · {{ l.qte }} u.</span></div><div class="barre"><span style="width:{{ l.pct }}%"></span></div></div>
+    {% empty %}<p class="text-muted mb-0">—</p>{% endfor %}</div></div></div>
+  <div class="col-12"><div class="card"><div class="card-header bg-white fw-semibold">Évolution mensuelle</div><div class="card-body">
+    {% for l in par_mois %}<div class="mb-2"><div class="d-flex justify-content-between small"><span>{{ l.nom }}</span><span>{{ l.valeur|gnf }} · {{ l.qte }} u.</span></div><div class="barre"><span style="width:{{ l.pct }}%"></span></div></div>
+    {% empty %}<p class="text-muted mb-0">—</p>{% endfor %}</div></div></div>
+</div>
+{% endblock %}

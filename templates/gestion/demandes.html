@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titre %}Besoins{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Historique des demandes</h1>
+  {% if user.peut_demander %}<a class="btn btn-ang" href="{% url 'demande_creer' %}"><i class="bi bi-plus-circle"></i> Exprimer un besoin</a>{% endif %}
+</div>
+<form method="get" class="card card-body mb-3"><div class="row g-2">
+  <div class="col-lg-3">{{ form.q }}</div><div class="col-6 col-lg-2">{{ form.statut }}</div>
+  <div class="col-6 col-lg-2">{{ form.priorite }}</div><div class="col-6 col-lg-3">{{ form.structure }}</div>
+  <div class="col-6 col-lg-2">{{ form.exercice }}</div>
+  <div class="col-6 col-lg-2"><div class="input-group"><span class="input-group-text">Du</span>{{ form.du }}</div></div>
+  <div class="col-6 col-lg-2"><div class="input-group"><span class="input-group-text">Au</span>{{ form.au }}</div></div>
+  <div class="col-lg-4 d-flex gap-2"><button class="btn btn-ang"><i class="bi bi-search"></i> Filtrer</button>
+    <a class="btn btn-outline-secondary" href="{% url 'demandes' %}">Réinitialiser</a></div>
+</div></form>
+<div class="card">
+  <div class="card-header bg-white">{{ page.paginator.count }} demande{{ page.paginator.count|pluralize }}</div>
+  <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+    <thead><tr><th>Référence</th><th>Objet</th><th>Direction / Commission</th><th>Demandeur</th><th>Exercice</th><th>Priorité</th><th>Statut</th><th>Date</th></tr></thead>
+    <tbody>{% for d in page %}
+      <tr><td class="text-nowrap"><a class="fw-semibold text-decoration-none" href="{% url 'demande_detail' d.pk %}">{{ d.reference }}</a></td>
+        <td>{{ d.objet|truncatechars:55 }}</td><td>{{ d.structure }}</td><td>{{ d.demandeur }}</td><td>{{ d.exercice }}</td>
+        <td><span class="badge bg-{{ d.classe_priorite }}">{{ d.get_priorite_display }}</span></td>
+        <td><span class="badge bg-{{ d.classe_statut }}">{{ d.get_statut_display }}</span></td>
+        <td class="text-nowrap">{{ d.cree_le|date:"d/m/Y" }}</td></tr>
+    {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">Aucune demande.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <div class="card-footer bg-white">{% include "partials/pagination.html" %}</div>
+</div>
+{% endblock %}

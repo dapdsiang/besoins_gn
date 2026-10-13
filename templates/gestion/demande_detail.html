@@ -1,0 +1,69 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}{{ d.reference }}{% endblock %}
+{% block contenu %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <div class="text-muted">{{ d.reference }} · exercice {{ d.exercice }}</div>
+    <h1 class="h4 mb-1">{{ d.objet }}</h1>
+    <span class="badge bg-{{ d.classe_statut }}">{{ d.get_statut_display }}</span>
+    <span class="badge bg-{{ d.classe_priorite }}">{{ d.get_priorite_display }}</span>
+  </div>
+  <div class="d-flex flex-wrap gap-2 no-print">
+    {% if modifiable %}<a class="btn btn-outline-secondary" href="{% url 'demande_modifier' d.pk %}"><i class="bi bi-pencil"></i> Modifier</a>{% endif %}
+    {% if peut_soumettre %}<form method="post" action="{% url 'demande_action' d.pk 'soumettre' %}">{% csrf_token %}<button class="btn btn-primary">Soumettre pour validation</button></form>{% endif %}
+    {% if peut_valider %}
+      <form method="post" action="{% url 'demande_action' d.pk 'valider' %}">{% csrf_token %}<button class="btn btn-success">Valider</button></form>
+      <a class="btn btn-danger" href="{% url 'demande_rejeter' d.pk %}">Rejeter</a>
+    {% endif %}
+    {% if peut_arbitrer %}<a class="btn btn-info text-dark" href="{% url 'demande_arbitrer' d.pk %}"><i class="bi bi-scale"></i> Arbitrer</a>{% endif %}
+    {% if peut_servir %}<a class="btn btn-primary" href="{% url 'demande_servir' d.pk %}"><i class="bi bi-box-arrow-right"></i> Servir (sortie de stock)</a>{% endif %}
+    {% if peut_cloturer %}<form method="post" action="{% url 'demande_action' d.pk 'cloturer' %}" onsubmit="return confirm('Clôturer en abandonnant le reliquat ?')">{% csrf_token %}<button class="btn btn-outline-dark">Clôturer</button></form>{% endif %}
+    {% if peut_annuler %}<form method="post" action="{% url 'demande_action' d.pk 'annuler' %}" onsubmit="return confirm('Annuler cette demande ?')">{% csrf_token %}<button class="btn btn-outline-danger">Annuler</button></form>{% endif %}
+  </div>
+</div>
+
+{% if etapes %}<div class="d-flex mb-4">{% for lib, etat in etapes %}<div class="etape {{ etat }}">{{ lib }}</div>{% endfor %}</div>{% endif %}
+{% if d.motif_rejet and d.statut == "REJETEE" or d.motif_rejet and d.statut == "BROUILLON" %}<div class="alert alert-danger"><strong>Rejet :</strong> {{ d.motif_rejet }}</div>{% endif %}
+{% if d.depassement_autorise %}<div class="alert alert-warning py-2"><i class="bi bi-exclamation-triangle"></i> Dépassement de l'enveloppe autorisé à l'arbitrage.</div>{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card mb-3"><div class="card-header bg-white fw-semibold">Lignes de la demande</div>
+    <div class="table-responsive"><table class="table align-middle mb-0">
+      <thead><tr><th>Article</th><th class="text-end">Demandé</th><th class="text-end">Accordé</th><th class="text-end">Servi</th><th class="text-end">P.U.</th><th class="text-end">Montant accordé</th></tr></thead>
+      <tbody>{% for l in lignes %}
+        <tr><td>{{ l.article.designation }}<div class="text-muted small">{{ l.justification }}</div></td>
+          <td class="text-end">{{ l.quantite_demandee }}</td><td class="text-end">{{ l.quantite_accordee|default_if_none:"—" }}</td>
+          <td class="text-end">{{ l.quantite_servie }}</td><td class="text-end">{{ l.prix_unitaire|nombre }}</td>
+          <td class="text-end">{% if l.quantite_accordee is not None %}{{ l.montant_accorde|gnf }}{% else %}<span class="text-muted">{{ l.montant_demande|gnf }} (estimé)</span>{% endif %}</td></tr>
+      {% endfor %}</tbody>
+      <tfoot><tr class="fw-bold"><td colspan="5" class="text-end">Total demandé / accordé</td><td class="text-end">{{ d.montant_demande|gnf }}{% if d.montant_accorde %}<br>{{ d.montant_accorde|gnf }}{% endif %}</td></tr></tfoot>
+    </table></div></div>
+
+    {% if bons %}<div class="card mb-3"><div class="card-header bg-white fw-semibold">Bons de sortie</div><ul class="list-group list-group-flush">
+      {% for b in bons %}<li class="list-group-item"><a href="{% url 'bon_sortie' b.pk %}">{{ b.reference }}</a> · {{ b.date|date:"d/m/Y H:i" }}</li>{% endfor %}</ul></div>{% endif %}
+
+    <div class="card"><div class="card-header bg-white fw-semibold">Historique</div><ul class="list-group list-group-flush small">
+      {% for h in historique %}<li class="list-group-item">{{ h.date|date:"d/m/Y H:i" }} · <strong>{{ h.utilisateur|default:"—" }}</strong> · {{ h.action }}{% if h.commentaire %}<div class="text-muted">{{ h.commentaire }}</div>{% endif %}</li>{% endfor %}</ul></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card mb-3"><div class="card-header bg-white fw-semibold">Informations</div>
+      <dl class="row mb-0 p-3 small">
+        <dt class="col-5">Direction</dt><dd class="col-7">{{ d.structure }}</dd>
+        <dt class="col-5">Demandeur</dt><dd class="col-7">{{ d.demandeur }}</dd>
+        <dt class="col-5">Créée le</dt><dd class="col-7">{{ d.cree_le|date:"d/m/Y" }}</dd>
+        <dt class="col-5">Besoin pour le</dt><dd class="col-7">{{ d.date_souhaitee|date:"d/m/Y"|default:"—" }}</dd>
+      </dl>
+      {% if d.justification %}<div class="px-3 pb-3 small"><strong>Justification</strong><br>{{ d.justification|linebreaksbr }}</div>{% endif %}
+      {% if d.commentaire_arbitrage %}<div class="px-3 pb-3 small"><strong>Arbitrage</strong><br>{{ d.commentaire_arbitrage|linebreaksbr }}</div>{% endif %}
+    </div>
+    {% if budget %}<div class="card"><div class="card-header bg-white fw-semibold">Enveloppe {{ d.exercice }} – {{ d.structure.code }}</div>
+      <dl class="row mb-0 p-3 small">
+        <dt class="col-6">Alloué</dt><dd class="col-6 text-end">{{ budget.alloue|gnf }}</dd>
+        <dt class="col-6">Déjà engagé</dt><dd class="col-6 text-end">{{ budget.engage|gnf }}</dd>
+        <dt class="col-6">Disponible</dt><dd class="col-6 text-end fw-bold {% if budget.disponible < budget.montant_demande %}text-danger{% endif %}">{{ budget.disponible|gnf }}</dd>
+        <dt class="col-6">Cette demande</dt><dd class="col-6 text-end">{{ budget.montant_demande|gnf }}</dd>
+      </dl></div>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titre %}{{ titre_page }}{% endblock %}
+{% block contenu %}
+<form method="post">{% csrf_token %}
+<div class="card mb-3"><div class="card-body p-4"><h1 class="h5 mb-4">{{ titre_page }}</h1>{{ form.non_field_errors }}
+  <div class="row"><div class="col-md-4">{% include "partials/champ.html" with field=form.fournisseur %}</div>
+    <div class="col-md-4">{% include "partials/champ.html" with field=form.date_commande %}</div>
+    <div class="col-md-4">{% include "partials/champ.html" with field=form.date_livraison_prevue %}</div></div>
+  {% include "partials/champ.html" with field=form.observations %}</div></div>
+<div class="card mb-3"><div class="card-header bg-white fw-semibold">Articles commandés</div><div class="card-body">{% include "partials/formset_lignes.html" %}</div></div>
+<button class="btn btn-ang"><i class="bi bi-save"></i> Enregistrer le brouillon</button> <a class="btn btn-outline-secondary" href="javascript:history.back()">Annuler</a>
+</form>
+{% endblock %}

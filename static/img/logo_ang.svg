@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Logo ANG">
+  <title>Assemblée Nationale de Guinée (logo provisoire)</title>
+  <defs><clipPath id="c"><circle cx="100" cy="100" r="92"/></clipPath></defs>
+  <circle cx="100" cy="100" r="98" fill="#fff"/>
+  <g clip-path="url(#c)">
+    <rect x="0" y="0" width="68" height="200" fill="#CE1126"/>
+    <rect x="66" y="0" width="68" height="200" fill="#FCD116"/>
+    <rect x="132" y="0" width="68" height="200" fill="#009460"/>
+  </g>
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#14213d" stroke-width="5"/>
+  <circle cx="100" cy="100" r="62" fill="#fff" stroke="#14213d" stroke-width="3"/>
+  <path d="M52 112h96v8H52zM60 120h8v22h-8zM84 120h8v22h-8zM108 120h8v22h-8zM132 120h8v22h-8zM52 142h96v8H52z" fill="#14213d"/>
+  <path d="M48 112 100 76l52 36z" fill="#14213d"/>
+  <text x="100" y="108" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="22" fill="#fff">ANG</text>
+</svg>

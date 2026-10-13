@@ -1,0 +1,9 @@
+<div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Référence</th><th>Objet</th><th>Direction</th><th>Priorité</th><th>Statut</th></tr></thead>
+  <tbody>{% for d in demandes %}
+    <tr><td class="text-nowrap"><a class="fw-semibold text-decoration-none" href="{% url 'demande_detail' d.pk %}">{{ d.reference }}</a></td>
+      <td>{{ d.objet|truncatechars:50 }}</td><td>{{ d.structure.code }}</td>
+      <td><span class="badge bg-{{ d.classe_priorite }}">{{ d.get_priorite_display }}</span></td>
+      <td><span class="badge bg-{{ d.classe_statut }}">{{ d.get_statut_display }}</span></td></tr>
+  {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Aucune demande.</td></tr>{% endfor %}</tbody>
+</table></div>

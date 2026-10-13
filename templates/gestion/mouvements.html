@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Mouvements de stock{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Mouvements de stock</h1>
+<form method="get" class="card card-body mb-3"><div class="row g-2">
+  <div class="col-lg-5"><select class="form-select" name="article"><option value="">Tous les articles</option>{% for a in articles %}<option value="{{ a.pk }}" {% if a.pk|stringformat:"s" == article_sel %}selected{% endif %}>{{ a.designation }}</option>{% endfor %}</select></div>
+  <div class="col-lg-4"><select class="form-select" name="type_mvt"><option value="">Tous les types</option>{% for c, l in types %}<option value="{{ c }}" {% if c == type_sel %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-lg-3"><button class="btn btn-ang">Filtrer</button> <a class="btn btn-outline-secondary" href="{% url 'mouvements' %}">Réinit.</a></div>
+</div></form>
+<div class="card"><div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0">
+  <thead><tr><th>Date</th><th>Article</th><th>Type</th><th class="text-end">Quantité</th><th class="text-end">Stock après</th><th>Direction</th><th>Motif</th><th>Par</th></tr></thead>
+  <tbody>{% for m in page %}
+    <tr><td class="text-nowrap">{{ m.date|date:"d/m/Y H:i" }}</td><td>{{ m.article.designation }}</td><td>{{ m.get_type_mvt_display }}</td>
+      <td class="text-end fw-semibold text-{{ m.classe }}">{{ m.quantite|stringformat:"+d" }}</td><td class="text-end">{{ m.stock_apres }}</td>
+      <td>{{ m.structure.code|default:"" }}</td><td>{{ m.motif }}</td><td>{{ m.utilisateur|default:"" }}</td></tr>
+  {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">Aucun mouvement.</td></tr>{% endfor %}</tbody>
+</table></div><div class="card-footer bg-white">{% include "partials/pagination.html" %}</div></div>
+{% endblock %}

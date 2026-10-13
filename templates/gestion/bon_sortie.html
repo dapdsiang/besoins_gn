@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load static gestion_extras %}
+{% block titre %}{{ bon.reference }}{% endblock %}
+{% block contenu %}
+<div class="card"><div class="card-body p-4">
+  <div class="d-flex align-items-center gap-3 mb-4"><img src="{% static APP_LOGO %}" style="height:80px" alt="Logo">
+    <div><div class="fw-bold">{{ APP_INSTITUTION }}</div><div class="text-muted small">{{ APP_DEVISE }}</div></div></div>
+  <h1 class="h4">Bon de sortie {{ bon.reference }}</h1>
+  <p>Date : {{ bon.date|date:"d/m/Y H:i" }} · Demande : <a href="{% url 'demande_detail' bon.demande.pk %}">{{ bon.demande.reference }}</a><br>
+     Bénéficiaire : {{ bon.demande.structure }} ({{ bon.demande.demandeur }}) · Magasinier : {{ bon.magasinier }}</p>
+  <table class="table"><thead><tr><th>Article</th><th class="text-end">Quantité</th><th class="text-end">P.U.</th><th class="text-end">Montant</th></tr></thead>
+    <tbody>{% for l in lignes %}<tr><td>{{ l.article.designation }}</td><td class="text-end">{{ l.quantite }}</td><td class="text-end">{{ l.prix_unitaire|nombre }}</td><td class="text-end">{{ l.montant|gnf }}</td></tr>{% endfor %}</tbody></table>
+  {% if bon.observations %}<p class="small">Observations : {{ bon.observations }}</p>{% endif %}
+  <div class="row mt-5 text-center"><div class="col">Le magasinier<br><br><br>________________</div><div class="col">Le bénéficiaire<br><br><br>________________</div></div>
+  <div class="mt-4 no-print"><button class="btn btn-ang" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button></div>
+</div></div>
+{% endblock %}

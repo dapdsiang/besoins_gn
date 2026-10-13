@@ -1,0 +1,7 @@
+<form method="get" class="card card-body mb-3"><div class="row g-2 align-items-end">
+  <div class="col-6 col-lg-2">{{ form.exercice.label_tag }}{{ form.exercice }}</div>
+  <div class="col-6 col-lg-3">{{ form.structure.label_tag }}{{ form.structure }}</div>
+  <div class="col-6 col-lg-2">{{ form.du.label_tag }}{{ form.du }}</div>
+  <div class="col-6 col-lg-2">{{ form.au.label_tag }}{{ form.au }}</div>
+  <div class="col-lg-3 d-flex gap-2"><button class="btn btn-ang">Appliquer</button>{% if export %}<a class="btn btn-outline-secondary" href="?{{ query }}{% if query %}&{% endif %}export=csv"><i class="bi bi-download"></i> CSV</a>{% endif %}</div>
+</div></form>

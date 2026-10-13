@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Tableau de bord{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Bonjour {{ user.first_name|default:user.username }} <small class="text-muted">· exercice {{ exercice }}</small></h1>
+  {% if user.peut_demander %}<a class="btn btn-ang" href="{% url 'demande_creer' %}"><i class="bi bi-plus-circle"></i> Exprimer un besoin</a>{% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><a class="kpi-lien" href="{% url 'demandes' %}"><div class="card h-100"><div class="card-body"><div class="text-muted small">Demandes en cours</div><div class="stat-nombre">{{ en_cours }}</div></div></div></a></div>
+  <div class="col-6 col-lg-3"><a class="kpi-lien" href="{% url 'demandes' %}?statut=SOUMISE"><div class="card h-100"><div class="card-body"><div class="text-muted small">À valider (ma file)</div><div class="stat-nombre">{{ nb_a_valider }}</div></div></div></a></div>
+  {% if user.vue_globale %}
+  <div class="col-6 col-lg-3"><a class="kpi-lien" href="{% url 'stock' %}?alertes=1"><div class="card h-100"><div class="card-body"><div class="text-muted small">Articles en alerte / rupture</div><div class="stat-nombre {% if nb_alertes %}text-danger{% endif %}">{{ nb_alertes }}</div></div></div></a></div>
+  <div class="col-6 col-lg-3"><a class="kpi-lien" href="{% url 'commandes' %}"><div class="card h-100"><div class="card-body"><div class="text-muted small">Commandes en cours</div><div class="stat-nombre">{{ commandes_en_cours }}</div></div></div></a></div>
+  {% else %}
+  <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Mes brouillons</div><div class="stat-nombre">{{ mes_brouillons }}</div></div></div></div>
+  {% endif %}
+</div>
+
+{% if budget %}
+<div class="card mb-4"><div class="card-body">
+  <div class="d-flex justify-content-between flex-wrap"><strong>Budget {{ exercice }} – {{ budget.libelle }}</strong><span>{{ budget.engage|gnf }} engagés sur {{ budget.alloue|gnf }} ({{ budget.taux }} %)</span></div>
+  <div class="barre mt-2 {% if budget.taux > 100 %}depasse{% elif budget.taux >= 85 %}alerte{% endif %}"><span style="width:{% if budget.taux > 100 %}100{% else %}{{ budget.taux }}{% endif %}%"></span></div>
+</div></div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    {% if a_valider %}<div class="card mb-3"><div class="card-header bg-white fw-semibold">À valider (hiérarchie)</div>
+      {% include "partials/liste_demandes.html" with demandes=a_valider %}</div>{% endif %}
+    {% if a_arbitrer %}<div class="card mb-3"><div class="card-header bg-white fw-semibold">À arbitrer (budget)</div>
+      {% include "partials/liste_demandes.html" with demandes=a_arbitrer %}</div>{% endif %}
+    {% if a_servir %}<div class="card mb-3"><div class="card-header bg-white fw-semibold">À servir (magasin)</div>
+      {% include "partials/liste_demandes.html" with demandes=a_servir %}</div>{% endif %}
+    <div class="card"><div class="card-header bg-white fw-semibold">Dernières demandes</div>
+      {% include "partials/liste_demandes.html" with demandes=recentes %}</div>
+  </div>
+  <div class="col-lg-5">
+    {% if user.vue_globale %}
+    <div class="card"><div class="card-header bg-white fw-semibold">Alertes de stock</div>
+      <ul class="list-group list-group-flush">
+      {% for a in alertes %}<li class="list-group-item d-flex justify-content-between align-items-center">{{ a.designation }}
+        <span><span class="badge bg-{{ a.niveau.1 }}">{{ a.niveau.0 }}</span> <small class="text-muted">{{ a.stock }} / seuil {{ a.seuil_alerte }}</small></span></li>
+      {% empty %}<li class="list-group-item text-muted">Aucune alerte.</li>{% endfor %}
+      </ul>
+      <div class="card-footer bg-white"><a href="{% url 'planification' %}">Voir le plan d'achat suggéré →</a></div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

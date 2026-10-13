@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Équipements{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h4 mb-0">Équipements et affectations</h1>
+  {% if user.peut_gerer_stock %}<a class="btn btn-ang" href="{% url 'equipement_creer' %}"><i class="bi bi-plus-circle"></i> Enregistrer un équipement existant</a>{% endif %}</div>
+<form method="get" class="card card-body mb-3"><div class="row g-2">
+  <div class="col-lg-3"><input class="form-control" name="q" value="{{ q }}" placeholder="N° inventaire, série, bénéficiaire…"></div>
+  <div class="col-lg-2"><select class="form-select" name="statut"><option value="">Tous statuts</option>{% for c, l in statuts %}<option value="{{ c }}" {% if c == sel.statut %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-lg-2"><select class="form-select" name="etat"><option value="">Tous états</option>{% for c, l in etats %}<option value="{{ c }}" {% if c == sel.etat %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-lg-3"><select class="form-select" name="structure"><option value="">Toutes les directions</option>{% for s in structures %}<option value="{{ s.pk }}" {% if s.pk|stringformat:"s" == sel.structure %}selected{% endif %}>{{ s.nom }}</option>{% endfor %}</select></div>
+  <div class="col-lg-2"><button class="btn btn-ang">Filtrer</button></div>
+</div></form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>N° inventaire</th><th>Équipement</th><th>N° série</th><th>Affecté à</th><th>Bénéficiaire</th><th>État</th><th>Statut</th><th class="text-end">Valeur</th></tr></thead>
+  <tbody>{% for e in page %}<tr><td><a class="fw-semibold text-decoration-none" href="{% url 'equipement_detail' e.pk %}">{{ e.reference }}</a></td><td>{{ e.article.designation }}</td><td>{{ e.numero_serie|default:"—" }}</td>
+    <td>{{ e.structure.code|default:"—" }}</td><td>{{ e.beneficiaire|default:"—" }}</td><td>{{ e.get_etat_display }}</td>
+    <td><span class="badge bg-{{ e.classe_statut }}">{{ e.get_statut_display }}</span></td><td class="text-end">{{ e.valeur_acquisition|gnf }}</td></tr>
+  {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">Aucun équipement.</td></tr>{% endfor %}</tbody>
+</table></div><div class="card-footer bg-white">{% include "partials/pagination.html" %}</div></div>
+{% endblock %}

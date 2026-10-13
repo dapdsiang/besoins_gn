@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}{{ eq.reference }}{% endblock %}
+{% block contenu %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div><div class="text-muted">{{ eq.reference }}</div><h1 class="h4 mb-1">{{ eq.article.designation }}</h1>
+    <span class="badge bg-{{ eq.classe_statut }}">{{ eq.get_statut_display }}</span> <span class="badge bg-light text-dark border">{{ eq.get_etat_display }}</span></div>
+  {% if user.peut_gerer_stock %}
+  <div class="d-flex flex-wrap gap-2 no-print">
+    {% if eq.statut == "STOCK" or eq.statut == "AFFECTE" %}<a class="btn btn-ang" href="{% url 'equipement_affecter' eq.pk %}"><i class="bi bi-arrow-right-circle"></i> {% if eq.statut == "STOCK" %}Affecter{% else %}Transférer{% endif %}</a>{% endif %}
+    {% if eq.statut == "AFFECTE" %}
+      <form method="post" action="{% url 'equipement_action' eq.pk 'restituer' %}">{% csrf_token %}<button class="btn btn-outline-secondary">Restituer au stock</button></form>
+      <form method="post" action="{% url 'equipement_action' eq.pk 'reparation' %}">{% csrf_token %}<button class="btn btn-outline-warning">Mettre en réparation</button></form>{% endif %}
+    {% if eq.statut == "REPAR" %}<form method="post" action="{% url 'equipement_action' eq.pk 'service' %}">{% csrf_token %}<button class="btn btn-outline-success">Remettre en service</button></form>{% endif %}
+    {% if eq.statut != "REFORME" %}<button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalReforme">Réformer</button>{% endif %}
+  </div>{% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-4"><div class="card"><div class="card-header bg-white fw-semibold">Fiche</div>
+    <dl class="row mb-0 p-3 small">
+      <dt class="col-5">N° de série</dt><dd class="col-7">{{ eq.numero_serie|default:"—" }}</dd>
+      <dt class="col-5">Acquisition</dt><dd class="col-7">{{ eq.date_acquisition|date:"d/m/Y" }}</dd>
+      <dt class="col-5">Valeur</dt><dd class="col-7">{{ eq.valeur_acquisition|gnf }}</dd>
+      <dt class="col-5">Affecté à</dt><dd class="col-7">{{ eq.structure|default:"—" }}</dd>
+      <dt class="col-5">Bénéficiaire</dt><dd class="col-7">{{ eq.beneficiaire|default:"—" }}</dd>
+      <dt class="col-5">Localisation</dt><dd class="col-7">{{ eq.localisation|default:"—" }}</dd>
+    </dl></div></div>
+  <div class="col-lg-8"><div class="card"><div class="card-header bg-white fw-semibold">Historique des affectations</div>
+    <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Du</th><th>Au</th><th>Direction</th><th>Bénéficiaire</th><th>Motif</th></tr></thead>
+      <tbody>{% for a in affectations %}<tr><td>{{ a.date_debut|date:"d/m/Y" }}</td><td>{{ a.date_fin|date:"d/m/Y"|default:"en cours" }}</td><td>{{ a.structure }}</td><td>{{ a.beneficiaire|default:"—" }}</td><td>{{ a.motif }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Jamais affecté.</td></tr>{% endfor %}</tbody></table></div></div></div>
+</div>
+<div class="modal fade" id="modalReforme" tabindex="-1"><div class="modal-dialog"><form class="modal-content" method="post" action="{% url 'equipement_action' eq.pk 'reformer' %}">{% csrf_token %}
+  <div class="modal-header"><h5 class="modal-title">Réformer l'équipement</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><label class="form-label">Motif de la réforme <span class="text-danger">*</span></label><input name="motif" class="form-control" required maxlength="250"></div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button class="btn btn-dark">Réformer</button></div></form></div></div>
+{% endblock %}

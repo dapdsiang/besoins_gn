@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Servir {{ d.reference }}{% endblock %}
+{% block contenu %}
+<h1 class="h4">Sortie de stock – {{ d.reference }}</h1>
+<p class="text-muted">{{ d.objet }} · destinataire : {{ d.structure }} ({{ d.demandeur }})</p>
+<form method="post">{% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="card mb-3"><div class="table-responsive"><table class="table align-middle mb-0">
+    <thead><tr><th>Article</th><th class="text-end">Accordé</th><th class="text-end">Déjà servi</th><th class="text-end">Stock</th><th style="width:160px">Quantité à servir</th></tr></thead>
+    <tbody>{% for l, champ in form.rows %}
+      <tr><td>{{ l.article.designation }}{% if l.article.est_equipement %} <span class="badge bg-secondary">Équipement : affectation automatique</span>{% endif %}</td>
+        <td class="text-end">{{ l.quantite_accordee }}</td><td class="text-end">{{ l.quantite_servie }}</td>
+        <td class="text-end {% if l.article.stock < l.reste_a_servir %}text-danger fw-bold{% endif %}">{{ l.article.stock }}</td>
+        <td>{{ champ }}{% for e in champ.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td></tr>
+    {% endfor %}</tbody></table></div></div>
+  <div class="card card-body mb-3">{% include "partials/champ.html" with field=form.observations %}</div>
+  <button class="btn btn-ang"><i class="bi bi-check2"></i> Valider la sortie</button> <a class="btn btn-outline-secondary" href="{% url 'demande_detail' d.pk %}">Annuler</a>
+</form>
+{% endblock %}

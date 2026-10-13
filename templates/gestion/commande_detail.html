@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}{{ c.reference }}{% endblock %}
+{% block contenu %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div><div class="text-muted">{{ c.reference }}</div><h1 class="h4 mb-1">{{ c.fournisseur }}</h1>
+    <span class="badge bg-{{ c.classe_statut }}">{{ c.get_statut_display }}</span>{% if c.en_retard %} <span class="badge bg-danger">Livraison en retard</span>{% endif %}</div>
+  <div class="d-flex flex-wrap gap-2 no-print">
+    {% if modifiable %}<a class="btn btn-outline-secondary" href="{% url 'commande_modifier' c.pk %}">Modifier</a>
+      <form method="post" action="{% url 'commande_action' c.pk 'envoyer' %}">{% csrf_token %}<button class="btn btn-primary">Marquer comme envoyée</button></form>{% endif %}
+    {% if user.peut_gerer_stock and c.statut == "ENVOYEE" or user.peut_gerer_stock and c.statut == "PARTIELLE" %}<a class="btn btn-ang" href="{% url 'reception' c.pk %}"><i class="bi bi-box-seam"></i> Réceptionner une livraison</a>{% endif %}
+    {% if user.peut_commander and c.statut == "BROUILLON" or user.peut_commander and c.statut == "ENVOYEE" %}<form method="post" action="{% url 'commande_action' c.pk 'annuler' %}" onsubmit="return confirm('Annuler la commande ?')">{% csrf_token %}<button class="btn btn-outline-danger">Annuler</button></form>{% endif %}
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i></button>
+  </div>
+</div>
+<p class="text-muted">Commande du {{ c.date_commande|date:"d/m/Y" }} · Livraison prévue : {{ c.date_livraison_prevue|date:"d/m/Y"|default:"—" }} · Créée par {{ c.cree_par }}</p>
+<div class="card mb-3"><div class="table-responsive"><table class="table align-middle mb-0">
+  <thead><tr><th>Article</th><th class="text-end">Commandé</th><th class="text-end">Reçu</th><th class="text-end">Reste</th><th class="text-end">P.U.</th><th class="text-end">Montant</th></tr></thead>
+  <tbody>{% for l in lignes %}<tr><td>{{ l.article.designation }}</td><td class="text-end">{{ l.quantite }}</td><td class="text-end">{{ l.quantite_recue }}</td><td class="text-end">{{ l.reste }}</td><td class="text-end">{{ l.prix_unitaire|nombre }}</td><td class="text-end">{{ l.montant|gnf }}</td></tr>{% endfor %}</tbody>
+  <tfoot><tr class="fw-bold"><td colspan="5" class="text-end">Total</td><td class="text-end">{{ c.montant_total|gnf }}</td></tr></tfoot></table></div></div>
+{% if c.observations %}<p><strong>Observations :</strong> {{ c.observations }}</p>{% endif %}
+<div class="card"><div class="card-header bg-white fw-semibold">Livraisons reçues</div><ul class="list-group list-group-flush small">
+  {% for l in livraisons %}<li class="list-group-item">{{ l.reference }} · {{ l.date_livraison|date:"d/m/Y" }} · BL {{ l.numero_bl|default:"—" }} · reçu par {{ l.recu_par }}{% if l.observations %} · <em>{{ l.observations }}</em>{% endif %}</li>
+  {% empty %}<li class="list-group-item text-muted">Aucune livraison.</li>{% endfor %}</ul></div>
+{% endblock %}

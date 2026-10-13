@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load gestion_extras %}
+{% block titre %}Arbitrage {{ d.reference }}{% endblock %}
+{% block contenu %}
+<h1 class="h4">Arbitrage budgétaire – {{ d.reference }}</h1>
+<p class="text-muted">{{ d.objet }} · {{ d.structure }} · demandé par {{ d.demandeur }}</p>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Enveloppe {{ d.exercice }}</div><div class="h5 mb-0">{{ budget.alloue|gnf }}</div>{% if not budget.enveloppe %}<div class="text-danger small">Aucune enveloppe définie pour cette direction.</div>{% endif %}</div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Déjà engagé</div><div class="h5 mb-0">{{ budget.engage|gnf }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Disponible</div><div class="h5 mb-0 {% if budget.disponible < budget.montant_demande %}text-danger{% else %}text-success{% endif %}">{{ budget.disponible|gnf }}</div><div class="small text-muted">Demande : {{ budget.montant_demande|gnf }}</div></div></div></div>
+</div>
+<form method="post">{% csrf_token %}
+  {{ formset.management_form }}
+  <div class="card mb-3"><div class="table-responsive"><table class="table align-middle mb-0">
+    <thead><tr><th>Article</th><th class="text-end">Stock</th><th class="text-end">Demandé</th><th style="width:160px">Accordé</th><th class="text-end">P.U.</th></tr></thead>
+    <tbody>{% for fm in formset %}
+      <tr>{% for h in fm.hidden_fields %}{{ h }}{% endfor %}
+        <td>{{ fm.instance.article.designation }}<div class="small text-muted">{{ fm.instance.justification }}</div></td>
+        <td class="text-end">{{ fm.instance.article.stock }}</td><td class="text-end">{{ fm.instance.quantite_demandee }}</td>
+        <td>{{ fm.quantite_accordee }}{% for e in fm.quantite_accordee.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</td>
+        <td class="text-end">{{ fm.instance.prix_unitaire|nombre }}</td></tr>
+    {% endfor %}</tbody></table></div></div>
+  <div class="card"><div class="card-body">
+    {{ decision.non_field_errors }}
+    <div class="mb-3">{% for radio in decision.decision %}<div class="form-check">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>{% endfor %}</div>
+    {% include "partials/champ.html" with field=decision.commentaire %}
+    {% include "partials/champ.html" with field=decision.autoriser_depassement %}
+    <button class="btn btn-ang">Enregistrer la décision</button> <a class="btn btn-outline-secondary" href="{% url 'demande_detail' d.pk %}">Retour</a>
+  </div></div>
+</form>
+{% endblock %}
